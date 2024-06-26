@@ -10,8 +10,8 @@ import (
 )
 
 func main() {
-	var numberofLinesFlag bool
-	var numberofLines int
+				var numberofLinesFlag bool
+			var numberofLines int
 	var err error
 	var fileName string
 	var file *os.File
