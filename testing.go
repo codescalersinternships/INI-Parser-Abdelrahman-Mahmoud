@@ -32,7 +32,7 @@ func main() {
 		numberofLines = 10
 		fileName = args[0]
 	} else {
-		log.fatal("Wrong Number of Arguments")
+		log.Fatal("Wrong Number of Arguments")
 	}
 
 	file, err = os.Open(fileName)
