@@ -31,5 +31,5 @@ jobs:
     - name: Install dependencies
       run: go get .
 
-    - name: Run format
-      run: go fmt github.com/codescalersinternships/INI-Parser-Abdelrahman-Mahmoud/...
+    - name: format
+      run: gofmt -w -v ./..
