@@ -15,6 +15,7 @@ func main() {
 	var err error
 	var fileName string
 	var file *os.File
+	var lines []string
 
 	flag.BoolVar(&numberofLinesFlag, "n", false, "Number of Lines")
 
@@ -32,7 +33,7 @@ func main() {
 		numberofLines = 10
 		fileName = args[0]
 	} else {
-		log.fatal("Wrong Number of Arguments")
+		log.Fatal("Wrong Number of Arguments")
 	}
 
 	file, err = os.Open(fileName)
@@ -42,15 +43,17 @@ func main() {
 	}
 
 	fileScanner := bufio.NewScanner(file)
-
 	fileScanner.Split(bufio.ScanLines)
 
 	for fileScanner.Scan() {
-		if numberofLines == 0 {
-			break
-		}
-		fmt.Printf("%s\n\n", fileScanner.Text())
-		numberofLines--
+		lines = append(lines, fileScanner.Text())
+	}
+
+	if len(lines) < numberofLines {
+		numberofLines = len(lines)
+	}
+	for i := len(lines) - numberofLines; i < len(lines); i++ {
+		fmt.Printf("%s\n\n", lines[i])
 	}
 
 	file.Close()
