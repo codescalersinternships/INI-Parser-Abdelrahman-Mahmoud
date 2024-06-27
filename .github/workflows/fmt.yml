@@ -32,4 +32,5 @@ jobs:
       run: go get ./...
 
     - name: format
-      run: go fmt ./...
+      uses: Jerome1337/gofmt-action@v1.0.5
+
