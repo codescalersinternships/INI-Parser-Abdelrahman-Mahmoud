@@ -11,7 +11,7 @@ type IniFile struct {
 	sectionKeyValuePairs map[string]map[string]string
 }
 
-func (ini IniFile) LoadFromFile(file *os.File) {
+func (ini *IniFile) LoadFromFile(file *os.File) {
 
 	fileScanner := bufio.NewScanner(file)
 
@@ -41,4 +41,12 @@ func (ini IniFile) LoadFromFile(file *os.File) {
 	fmt.Println(ini.sectionKeyValuePairs)
 
 	defer file.Close()
+}
+
+func (ini *IniFile) GetSectionNames() []string {
+	var sections []string
+    for section := range ini.sectionKeyValuePairs {
+        sections = append(sections, section)
+    }
+	return sections
 }
