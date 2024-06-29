@@ -9,6 +9,7 @@ import (
 
 type IniFile struct {
 	sectionKeyValuePairs map[string]map[string]string
+	comments []string
 }
 
 func (ini *IniFile) LoadFromFile(file *os.File) {
@@ -26,6 +27,7 @@ func (ini *IniFile) LoadFromFile(file *os.File) {
 		line := fileScanner.Text()
 		line = strings.TrimSpace(line)
 		if len(line) == 0 || string(line[0]) == ";"  || string(line[0]) == "#"{
+			ini.comments = append(ini.comments, line)
 			continue
 		}			
 		if string(line[0]) == "[" {
