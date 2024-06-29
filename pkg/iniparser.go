@@ -74,3 +74,7 @@ func (ini *IniFile) GetSections() string {
 	sections +="} }"
 	return sections
 }
+
+func (ini *IniFile) Get(section string, key string) string {
+	return ini.sectionKeyValuePairs[section][key]
+}
