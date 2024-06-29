@@ -44,9 +44,33 @@ func (ini *IniFile) LoadFromFile(file *os.File) {
 }
 
 func (ini *IniFile) GetSectionNames() []string {
-	var sections []string
+	var sectionNames []string
     for section := range ini.sectionKeyValuePairs {
-        sections = append(sections, section)
+        sectionNames = append(sectionNames, section)
     }
+	return sectionNames
+}
+
+func (ini *IniFile) GetSections() string {
+	sectionNames := ini.GetSectionNames()
+	sections := "{ "
+    for i ,section := range sectionNames {
+		sections += section
+		sections += ": {"
+		j :=0
+		for key ,value := range ini.sectionKeyValuePairs[section] {
+			sections += key
+			sections += ": "
+			sections += value
+			if j != len(ini.sectionKeyValuePairs[section]) - 1 {
+				sections += ", "
+			}
+			j++
+		}
+		if i != len(sectionNames) - 1 {
+        	sections +="}, "
+		}
+    }
+	sections +="} }"
 	return sections
 }
