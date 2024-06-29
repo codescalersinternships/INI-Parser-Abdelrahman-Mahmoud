@@ -8,3 +8,6 @@
 
 # Bin #
 bin/
+
+# Testing file #
+main.go
