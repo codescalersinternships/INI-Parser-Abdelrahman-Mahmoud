@@ -1,0 +1,10 @@
+# Text files used for testing commands #
+*.txt 
+
+# Binary files #
+*
+!*.*
+!*/
+
+# Bin #
+bin/
