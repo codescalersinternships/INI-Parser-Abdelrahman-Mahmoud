@@ -54,15 +54,15 @@ func (ini *IniFile) GetSectionNames() []string {
 func (ini *IniFile) GetSections() string {
 	sectionNames := ini.GetSectionNames()
 	sections := "{ "
-    for i ,section := range sectionNames {
-		sections += section
+    for i ,sectionName := range sectionNames {
+		sections += sectionName
 		sections += ": {"
 		j :=0
-		for key ,value := range ini.sectionKeyValuePairs[section] {
+		for key ,value := range ini.sectionKeyValuePairs[sectionName] {
 			sections += key
 			sections += ": "
 			sections += value
-			if j != len(ini.sectionKeyValuePairs[section]) - 1 {
+			if j != len(ini.sectionKeyValuePairs[sectionName]) - 1 {
 				sections += ", "
 			}
 			j++
@@ -77,4 +77,17 @@ func (ini *IniFile) GetSections() string {
 
 func (ini *IniFile) Get(section string, key string) string {
 	return ini.sectionKeyValuePairs[section][key]
+}
+
+func (ini *IniFile) Set(section string, key string, value string) {
+	sectionNames := ini.GetSectionNames()
+	for _, sectionName := range sectionNames {
+        if sectionName == section {
+            ini.sectionKeyValuePairs[section][key] = value
+			return
+        }
+    }
+	ini.sectionKeyValuePairs[section] = make(map[string]string)
+	ini.sectionKeyValuePairs[section][key] = value
+	return
 }
