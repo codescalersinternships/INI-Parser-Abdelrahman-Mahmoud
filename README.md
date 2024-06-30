@@ -52,7 +52,7 @@ To read an INI file SaveToFile function is used to write the INI file comments, 
    ```
 9. Run the project using
    ```console
-    user@user-VirtualBox:~$ ./demo
+   user@user-VirtualBox:~$ ./demo
    ```
 
 ## Demo
