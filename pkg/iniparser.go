@@ -103,7 +103,6 @@ func (ini *IniFile) Set(section string, key string, value string) {
 	ini.sectionKeyValuePairs[section] = make(map[string]string)
 	ini.sectionKeyValuePairs[section][key] = value
 
-	return
 }
 
 func (ini *IniFile) toString() string {
