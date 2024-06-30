@@ -11,8 +11,9 @@ type IniFile struct {
 	comments []string
 }
 
-func (ini *IniFile) LoadFromString(iniText string) error {
+func (ini *IniFile) loadFromString(iniText string) error {
 
+	fmt.Printf(iniText)
 	lines := strings.Split(iniText, "\n")
 
 	if len(lines) == 0 {
@@ -49,7 +50,7 @@ func (ini *IniFile) LoadFromFile(fileName string) error {
 		return fmt.Errorf("Error: trying to read file!")
 	}
 
-	err = ini.LoadFromString(string(fileContent))
+	err = ini.loadFromString(string(fileContent))
 	
 	fmt.Println(ini.sectionKeyValuePairs)
 
@@ -102,5 +103,30 @@ func (ini *IniFile) Set(section string, key string, value string) {
     }
 	ini.sectionKeyValuePairs[section] = make(map[string]string)
 	ini.sectionKeyValuePairs[section][key] = value
+	
 	return
+}
+
+func (ini *IniFile) toString() string {
+
+	iniText := ""
+
+	for _, comment := range ini.comments {
+		iniText += comment
+		iniText += "\n"
+	}
+
+	for sectionName := range ini.sectionKeyValuePairs {
+		iniText += "\n["
+		iniText += sectionName
+		iniText += "]\n"
+		for key ,value := range ini.sectionKeyValuePairs[sectionName] {
+			iniText += key
+			iniText += "="
+			iniText += value
+			iniText += "\n"
+		}
+	}
+	fmt.Printf(iniText)
+	return iniText
 }
