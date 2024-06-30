@@ -13,7 +13,6 @@ type IniFile struct {
 
 func (ini *IniFile) loadFromString(iniText string) error {
 
-	fmt.Printf(iniText)
 	lines := strings.Split(iniText, "\n")
 
 	if len(lines) == 0 {
@@ -127,7 +126,7 @@ func (ini *IniFile) toString() string {
 			iniText += "\n"
 		}
 	}
-	fmt.Printf(iniText)
+	fmt.Print(iniText)
 	return iniText
 }
 
