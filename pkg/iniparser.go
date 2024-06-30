@@ -103,7 +103,7 @@ func (ini *IniFile) Set(section string, key string, value string) {
     }
 	ini.sectionKeyValuePairs[section] = make(map[string]string)
 	ini.sectionKeyValuePairs[section][key] = value
-	
+
 	return
 }
 
@@ -129,4 +129,16 @@ func (ini *IniFile) toString() string {
 	}
 	fmt.Printf(iniText)
 	return iniText
+}
+
+func (ini *IniFile) SaveToFile(fileName string) error {
+	fileContent := []byte(ini.toString()) 
+
+	err := os.WriteFile(fileName, fileContent, 0644)
+
+	if err != nil {
+		return fmt.Errorf("Error: trying to write file!")
+	}
+
+	return nil
 }
