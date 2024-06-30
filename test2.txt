@@ -2,13 +2,13 @@
 
 #tgtgt
 
-[section 1]
-key2=value2
-key3=value3
-key1=value1
-
 [section 2]
 key3=value3
 
 [section 3]
 key1=value1
+
+[section 1]
+key1=value1
+key2=value2
+key3=value3
