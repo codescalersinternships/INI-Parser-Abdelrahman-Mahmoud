@@ -45,7 +45,47 @@ func (ini *IniFile) loadFromString(iniText string) error {
 	}
 	return nil
 }
+
+func (ini *IniFile) toString() string {
+
+	iniText := ""
+
+	for _, comment := range ini.comments {
+		iniText += comment
+		iniText += "\n"
+	}
+
+	for sectionName := range ini.sectionKeyValuePairs {
+		iniText += "\n["
+		iniText += sectionName
+		iniText += "]\n"
+		for key, value := range ini.sectionKeyValuePairs[sectionName] {
+			iniText += key
+			iniText += "="
+			iniText += value
+			iniText += "\n"
+		}
+	}
+	fmt.Print(iniText)
+	return iniText
+}
+
+func (ini *IniFile) checkFileType(fileName string) bool {
+	s := strings.Split(fileName, ".")
+
+	if s[0] == fileName || s[1] != "ini" {
+		return false
+	}
+	return true
+}
+
 func (ini *IniFile) LoadFromFile(fileName string) error {
+
+	correct := ini.checkFileType(fileName)
+	
+	if !correct {
+		return fmt.Errorf("Error: Wrong type of file!")
+	}
 
 	ini.fileName = fileName
 	fileContent, err := os.ReadFile(fileName)
@@ -54,11 +94,7 @@ func (ini *IniFile) LoadFromFile(fileName string) error {
 		return fmt.Errorf("Error: trying to read file!")
 	}
 
-	err = ini.loadFromString(string(fileContent))
-
-	fmt.Println(ini.sectionKeyValuePairs)
-
-	return err
+	return ini.loadFromString(string(fileContent))
 }
 
 func (ini *IniFile) GetSectionNames() []string {
@@ -110,36 +146,18 @@ func (ini *IniFile) Set(section string, key string, value string) {
 
 }
 
-func (ini *IniFile) toString() string {
-
-	iniText := ""
-
-	for _, comment := range ini.comments {
-		iniText += comment
-		iniText += "\n"
-	}
-
-	for sectionName := range ini.sectionKeyValuePairs {
-		iniText += "\n["
-		iniText += sectionName
-		iniText += "]\n"
-		for key, value := range ini.sectionKeyValuePairs[sectionName] {
-			iniText += key
-			iniText += "="
-			iniText += value
-			iniText += "\n"
-		}
-	}
-	fmt.Print(iniText)
-	return iniText
-}
-
 func (ini *IniFile) SaveToFile(arguments ...string) error {
 	var fileName string
 	if len(arguments) == 0 {
 		fileName = ini.fileName
 	} else {
 		fileName = arguments[0]
+
+		correct := ini.checkFileType(fileName)
+	
+		if !correct {
+			return fmt.Errorf("Error: Wrong type of file!")
+		}
 	}
 	fileContent := []byte(ini.toString())
 
