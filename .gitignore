@@ -1,6 +1,3 @@
-# Text files used for testing commands #
-*.txt 
-
 # Binary files #
 *
 !*.*
@@ -11,3 +8,6 @@ bin/
 
 # Testing file #
 main.go
+
+# Text files used for testing commands #
+*.txt 
