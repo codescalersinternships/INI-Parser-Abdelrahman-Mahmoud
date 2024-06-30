@@ -9,6 +9,7 @@ import (
 type IniFile struct {
 	sectionKeyValuePairs map[string]map[string]string
 	comments             []string
+	fileName             string
 }
 
 func (ini *IniFile) loadFromString(iniText string) error {
@@ -26,7 +27,10 @@ func (ini *IniFile) loadFromString(iniText string) error {
 
 	for _, line := range lines {
 		line = strings.TrimSpace(line)
-		if len(line) == 0 || string(line[0]) == ";" || string(line[0]) == "#" {
+		if len(line) == 0 {
+			continue
+		}
+		if string(line[0]) == ";" || string(line[0]) == "#" {
 			ini.comments = append(ini.comments, line)
 			continue
 		}
@@ -43,6 +47,7 @@ func (ini *IniFile) loadFromString(iniText string) error {
 }
 func (ini *IniFile) LoadFromFile(fileName string) error {
 
+	ini.fileName = fileName
 	fileContent, err := os.ReadFile(fileName)
 
 	if err != nil {
@@ -129,7 +134,13 @@ func (ini *IniFile) toString() string {
 	return iniText
 }
 
-func (ini *IniFile) SaveToFile(fileName string) error {
+func (ini *IniFile) SaveToFile(arguments ...string) error {
+	var fileName string
+	if len(arguments) == 0 {
+		fileName = ini.fileName
+	} else {
+		fileName = arguments[0]
+	}
 	fileContent := []byte(ini.toString())
 
 	err := os.WriteFile(fileName, fileContent, 0644)
