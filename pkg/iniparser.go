@@ -2,7 +2,6 @@ package iniparser
 
 import (
 	"strings"
-	"bufio"
 	"os"
 	"fmt"
 )
@@ -12,19 +11,20 @@ type IniFile struct {
 	comments []string
 }
 
-func (ini *IniFile) LoadFromFile(file *os.File) {
+func (ini *IniFile) LoadFromString(iniText string) error {
 
-	fileScanner := bufio.NewScanner(file)
+	lines := strings.Split(iniText, "\n")
 
-	fileScanner.Split(bufio.ScanLines)
+	if len(lines) == 0 {
+		return fmt.Errorf("Error: INI file is empty!")
+	}
 
 	var section string
 	var key string
 	var value string
 	ini.sectionKeyValuePairs = make(map[string]map[string]string) 
 
-	for fileScanner.Scan() {
-		line := fileScanner.Text()
+	for _, line := range lines {
 		line = strings.TrimSpace(line)
 		if len(line) == 0 || string(line[0]) == ";"  || string(line[0]) == "#"{
 			ini.comments = append(ini.comments, line)
@@ -39,10 +39,21 @@ func (ini *IniFile) LoadFromFile(file *os.File) {
 			ini.sectionKeyValuePairs[section][key] = value
 		}
 	}
+	return nil
+}
+func (ini *IniFile) LoadFromFile(fileName string) error {
 
+	fileContent, err := os.ReadFile(fileName)
+
+	if err != nil {
+		return fmt.Errorf("Error: trying to read file!")
+	}
+
+	err = ini.LoadFromString(string(fileContent))
+	
 	fmt.Println(ini.sectionKeyValuePairs)
 
-	defer file.Close()
+	return err
 }
 
 func (ini *IniFile) GetSectionNames() []string {
