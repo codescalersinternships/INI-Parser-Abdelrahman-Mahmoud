@@ -57,14 +57,14 @@ func (ini *IniFile) LoadFromString(iniText string) (map[string]map[string]string
 	return ini.sectionKeyValuePairs, nil
 }
 
-func (ini *IniFile) String() string {
+func (ini *IniFile) String(sectionKeyValueMap map[string]map[string]string) string {
 
 	iniText := ""
 
-	for sectionName := range ini.sectionKeyValuePairs {
+	for sectionName := range sectionKeyValueMap {
 		iniText = iniText + "\n[" + sectionName + "]\n"
-		for key, value := range ini.sectionKeyValuePairs[sectionName] {
-			iniText = iniText + key + "=" + value + "\n"
+		for key, value := range sectionKeyValueMap[sectionName] {
+			iniText = iniText + key + " = " + value + "\n"
 		}
 	}
 
@@ -112,9 +112,9 @@ func (ini *IniFile) Set(section string, key string, value string) {
 
 }
 
-func (ini *IniFile) SaveToFile(filePath string) error {
+func (ini *IniFile) SaveToFile(filePath string, sectionKeyValueMap map[string]map[string]string) error {
 
-	fileContent := []byte(ini.String())
+	fileContent := []byte(ini.String(sectionKeyValueMap))
 
 	err := os.WriteFile(filePath, fileContent, 0644)
 
