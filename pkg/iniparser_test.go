@@ -14,38 +14,38 @@ type LoadFromStringTestCase struct {
 	expectedMap   map[string]map[string]string
 }
 
-// type LoadFromFileTestCase struct {
-// 	desc     string
-// 	path     string
-// 	expected error
-// }
+type LoadFromFileTestCase struct {
+	desc     string
+	path     string
+	expected error
+}
 
-func TestINI_loadFromString(t *testing.T) {
+func TestINI_LoadFromString(t *testing.T) {
 	parser := IniFile{}
 	emptyMap := make(map[string]map[string]string)
 	testCases := []LoadFromStringTestCase{
 		{
 			desc:          "Empty string as input",
 			input:         "",
-			expectedError: errorFileIsEmpty,
+			expectedError: errFileIsEmpty,
 			expectedMap:   emptyMap,
 		},
 		{
 			desc:          "Only one comment line start with # as input",
 			input:         "#This is a comment",
-			expectedError: errorFileIsEmpty,
+			expectedError: errFileIsEmpty,
 			expectedMap:   emptyMap,
 		},
 		{
 			desc:          "Only one comment line start with ; as input",
 			input:         ";This is a comment",
-			expectedError: errorFileIsEmpty,
+			expectedError: errFileIsEmpty,
 			expectedMap:   emptyMap,
 		},
 		{
 			desc:          "Only one key value line as input",
 			input:         "key = value",
-			expectedError: errorFileIsEmpty,
+			expectedError: errFileIsEmpty,
 			expectedMap:   emptyMap,
 		},
 		{
@@ -60,7 +60,7 @@ func TestINI_loadFromString(t *testing.T) {
 				"!This is a comment 2\n" +
 				"!This is a comment 3\n" +
 				"!This is a comment 4",
-			expectedError: errorFileIsEmpty,
+			expectedError: errFileIsEmpty,
 			expectedMap:   emptyMap,
 		},
 		{
@@ -81,7 +81,7 @@ func TestINI_loadFromString(t *testing.T) {
 				"key2 = value2\n" +
 				"key3 = value3\n" +
 				"key4 = value4",
-			expectedError: errorFileIsEmpty,
+			expectedError: errFileIsEmpty,
 			expectedMap:   emptyMap,
 		},
 		{
@@ -263,7 +263,7 @@ key3 = value3
 
 	for _, test := range testCases {
 		t.Run(test.desc, func(t *testing.T) {
-			resultedMap, resultedError := parser.loadFromString(test.input)
+			resultedMap, resultedError := parser.LoadFromString(test.input)
 
 			assert.Equal(t, test.expectedError, resultedError)
 			if !reflect.DeepEqual(test.expectedMap, resultedMap) {
@@ -272,5 +272,9 @@ key3 = value3
 
 		})
 	}
+
+}
+
+func TestINI_loadFromFile(t *testing.T) {
 
 }
