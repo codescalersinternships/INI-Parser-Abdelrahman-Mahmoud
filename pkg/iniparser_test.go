@@ -15,9 +15,10 @@ type LoadFromStringTestCase struct {
 }
 
 type LoadFromFileTestCase struct {
-	desc     string
-	path     string
-	expected error
+	desc          string
+	path          string
+	expectedError error
+	expectedMap   map[string]map[string]string
 }
 
 func TestINI_LoadFromString(t *testing.T) {
@@ -65,7 +66,7 @@ func TestINI_LoadFromString(t *testing.T) {
 		},
 		{
 			desc: "Only sections as input",
-			input: "[section1]\n " +
+			input: "[section1]\n" +
 				"[section2]\n" +
 				"[section3]\n" +
 				"[section4]",
@@ -276,5 +277,179 @@ key3 = value3
 }
 
 func TestINI_loadFromFile(t *testing.T) {
+	parser := IniFile{}
+	emptyMap := make(map[string]map[string]string)
+	testCases := []LoadFromFileTestCase{
+		{
+			desc:          "Wrong file path",
+			path:          "no path",
+			expectedError: errReadingFile,
+			expectedMap:   emptyMap,
+		},
+		{
+			desc:          "Empty file as input",
+			path:          "testdata/test_01.txt",
+			expectedError: errFileIsEmpty,
+			expectedMap:   emptyMap,
+		},
+		{
+			desc:          "Only one comment line start with # inside file",
+			path:          "testdata/test_02.txt",
+			expectedError: errFileIsEmpty,
+			expectedMap:   emptyMap,
+		},
+		{
+			desc:          "Only one comment line start with ; inside file",
+			path:          "testdata/test_03.txt",
+			expectedError: errFileIsEmpty,
+			expectedMap:   emptyMap,
+		},
+		{
+			desc:          "Only one key value line inside file",
+			path:          "testdata/test_04.txt",
+			expectedError: errFileIsEmpty,
+			expectedMap:   emptyMap,
+		},
+		{
+			desc:          "Only one section line inside file",
+			path:          "testdata/test_05.txt",
+			expectedError: nil,
+			expectedMap:   map[string]map[string]string{"section": make(map[string]string)},
+		},
+		{
+			desc:          "Only comments inside file",
+			path:          "testdata/test_06.txt",
+			expectedError: errFileIsEmpty,
+			expectedMap:   emptyMap,
+		},
+		{
+			desc:          "Only sections inside file",
+			path:          "testdata/test_07.txt",
+			expectedError: nil,
+			expectedMap: map[string]map[string]string{"section1": make(map[string]string),
+				"section2": make(map[string]string),
+				"section3": make(map[string]string),
+				"section4": make(map[string]string)},
+		},
+		{
+			desc:          "Only keys values inside file",
+			path:          "testdata/test_08.txt",
+			expectedError: errFileIsEmpty,
+			expectedMap:   emptyMap,
+		},
+		{
+			desc:          "Normal case 1",
+			path:          "testdata/test_09.txt",
+			expectedError: nil,
+			expectedMap: map[string]map[string]string{"section1": map[string]string{
+				"key1": "value1",
+				"key2": "value2",
+			},
+			},
+		},
+		{
+			desc:          "Normal case 2",
+			path:          "testdata/test_10.txt",
+			expectedError: nil,
+			expectedMap: map[string]map[string]string{"section1": map[string]string{
+				"key1": "value1",
+				"key2": "value2",
+				"key3": "value3",
+				"key4": "value4",
+			},
+				"section2": map[string]string{
+					"key1": "value1",
+					"key2": "value2",
+				},
+			},
+		},
+		{
+			desc:          "Normal case 3",
+			path:          "testdata/test_11.txt",
+			expectedError: nil,
+			expectedMap: map[string]map[string]string{"section1": map[string]string{
+				"key1": "value1",
+				"key2": "value2",
+				"key3": "value3",
+				"key4": "value4",
+			},
+				"section2": map[string]string{
+					"key1": "value1",
+					"key2": "value2",
+					"key3": "value3",
+				},
+				"section3": map[string]string{
+					"key1": "value1",
+					"key2": "value2",
+					"key3": "value3",
+					"key4": "value4",
+				},
+			},
+		},
+		{
+			desc:          "Normal case 4",
+			path:          "testdata/test_12.txt",
+			expectedError: nil,
+			expectedMap: map[string]map[string]string{"section1": map[string]string{
+				"key1": "value1",
+				"key2": "value2",
+				"key3": "value3",
+				"key4": "value4",
+				"key5": "value5",
+				"key6": "value6",
+				"key7": "value7",
+			},
+				"section2": map[string]string{
+					"key1": "value1",
+					"key2": "value2",
+					"key3": "value3",
+				},
+				"section3": map[string]string{
+					"key1": "value1",
+					"key2": "value2",
+					"key3": "value3",
+					"key4": "value4",
+				},
+			},
+		},
+		{
+			desc:          "Normal case 5",
+			path:          "testdata/test_13.txt",
+			expectedError: nil,
+			expectedMap: map[string]map[string]string{"section1": map[string]string{
+				"key1": "value1",
+				"key2": "value2",
+			},
+				"section2": map[string]string{
+					"key1": "value1",
+					"key2": "value2",
+					"key3": "value3",
+					"key4": "value4",
+					"key5": "value5",
+				},
+				"section3": map[string]string{
+					"key1": "value1",
+					"key2": "value2",
+					"key3": "value3",
+				},
+				"section4": map[string]string{
+					"key1": "value1",
+					"key2": "value2",
+					"key3": "value3",
+				},
+			},
+		},
+	}
 
+	for _, test := range testCases {
+		t.Run(test.desc, func(t *testing.T) {
+			resultedMap, resultedError := parser.LoadFromFile(test.path)
+
+			assert.Equal(t, test.expectedError, resultedError)
+			if !reflect.DeepEqual(test.expectedMap, resultedMap) {
+				t.Fail()
+			}
+
+		})
+	}
 }

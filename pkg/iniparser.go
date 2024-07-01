@@ -34,14 +34,17 @@ func (ini *IniFile) LoadFromString(iniText string) (map[string]map[string]string
 	lines := strings.Split(iniText, "\n")
 
 	for _, line := range lines {
-		line = strings.TrimSpace(line)
-		if string(line[0]) == ";" || string(line[0]) == "#" || len(line) == 0 {
+
+		if len(line) == 0 {
+			continue
+		} else if string(line[0]) == ";" || string(line[0]) == "#" {
 			continue
 		} else if string(line[0]) == "[" {
 			section = strings.TrimSpace(line[1 : len(line)-1])
 			ini.sectionKeyValuePairs[section] = make(map[string]string)
 			sectionAvailable = true
 		} else if sectionAvailable {
+
 			s := strings.Split(line, "=")
 			key, value = strings.TrimSpace(s[0]), strings.TrimSpace(s[1])
 			ini.sectionKeyValuePairs[section][key] = value
@@ -68,16 +71,16 @@ func (ini *IniFile) String() string {
 	return iniText
 }
 
-func (ini *IniFile) LoadFromFile(fileName string) error {
+func (ini *IniFile) LoadFromFile(fileName string) (map[string]map[string]string, error) {
 
 	fileContent, err := os.ReadFile(fileName)
 
 	if err != nil {
-		return errReadingFile
+		emptyMap := make(map[string]map[string]string)
+		return emptyMap, errReadingFile
 	}
 
-	_, err = ini.LoadFromString(string(fileContent))
-	return err
+	return ini.LoadFromString(string(fileContent))
 }
 
 func (ini *IniFile) GetSectionNames() []string {
