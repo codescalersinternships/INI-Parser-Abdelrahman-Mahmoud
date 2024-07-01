@@ -3,6 +3,7 @@ package iniparser
 import (
 	"fmt"
 	"os"
+	"reflect"
 	"strings"
 )
 
@@ -12,38 +13,44 @@ type IniFile struct {
 	fileName             string
 }
 
-func (ini *IniFile) loadFromString(iniText string) error {
-
-	lines := strings.Split(iniText, "\n")
-
-	if len(lines) == 0 {
-		return fmt.Errorf("Error: INI file is empty!")
-	}
+func (ini *IniFile) loadFromString(iniText string) (map[string]map[string]string, error) {
 
 	var section string
 	var key string
 	var value string
-	ini.sectionKeyValuePairs = make(map[string]map[string]string)
+	emptyMap := make(map[string]map[string]string)
+
+	sectionAvailable := false
+	ini.sectionKeyValuePairs = emptyMap
+
+	if iniText == "" {
+		return emptyMap, errorFileIsEmpty
+	}
+
+	lines := strings.Split(iniText, "\n")
 
 	for _, line := range lines {
 		line = strings.TrimSpace(line)
 		if len(line) == 0 {
 			continue
-		}
-		if string(line[0]) == ";" || string(line[0]) == "#" {
+		} else if string(line[0]) == ";" || string(line[0]) == "#" {
 			ini.comments = append(ini.comments, line)
 			continue
-		}
-		if string(line[0]) == "[" {
+		} else if string(line[0]) == "[" {
 			section = strings.TrimSpace(line[1 : len(line)-1])
 			ini.sectionKeyValuePairs[section] = make(map[string]string)
-		} else {
+			sectionAvailable = true
+		} else if sectionAvailable {
 			s := strings.Split(line, "=")
 			key, value = strings.TrimSpace(s[0]), strings.TrimSpace(s[1])
 			ini.sectionKeyValuePairs[section][key] = value
 		}
 	}
-	return nil
+
+	if reflect.DeepEqual(ini.sectionKeyValuePairs, make(map[string]map[string]string)) {
+		return emptyMap, errorFileIsEmpty
+	}
+	return ini.sectionKeyValuePairs, nil
 }
 
 func (ini *IniFile) toString() string {
@@ -82,19 +89,20 @@ func (ini *IniFile) checkFileType(fileName string) bool {
 func (ini *IniFile) LoadFromFile(fileName string) error {
 
 	correct := ini.checkFileType(fileName)
-	
+
 	if !correct {
-		return fmt.Errorf("Error: Wrong type of file!")
+		return errorWrongTypeOfFile
 	}
 
 	ini.fileName = fileName
 	fileContent, err := os.ReadFile(fileName)
 
 	if err != nil {
-		return fmt.Errorf("Error: trying to read file!")
+		return errorReadingFile
 	}
 
-	return ini.loadFromString(string(fileContent))
+	_, err = ini.loadFromString(string(fileContent))
+	return err
 }
 
 func (ini *IniFile) GetSectionNames() []string {
@@ -154,9 +162,9 @@ func (ini *IniFile) SaveToFile(arguments ...string) error {
 		fileName = arguments[0]
 
 		correct := ini.checkFileType(fileName)
-	
+
 		if !correct {
-			return fmt.Errorf("Error: Wrong type of file!")
+			return errorWrongTypeOfFile
 		}
 	}
 	fileContent := []byte(ini.toString())
@@ -164,7 +172,7 @@ func (ini *IniFile) SaveToFile(arguments ...string) error {
 	err := os.WriteFile(fileName, fileContent, 0644)
 
 	if err != nil {
-		return fmt.Errorf("Error: trying to write file!")
+		return errorWritingFile
 	}
 
 	return nil
