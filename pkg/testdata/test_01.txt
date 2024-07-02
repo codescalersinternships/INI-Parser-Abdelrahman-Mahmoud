@@ -1,7 +1,12 @@
 
-[section1]
+[section4]
 key1 = value1
 key2 = value2
+key3 = value3
+
+[section1]
+key2 = value2
+key1 = value1
 
 [section2]
 key4 = value4
@@ -11,11 +16,6 @@ key2 = value2
 key3 = value3
 
 [section3]
-key1 = value1
-key2 = value2
-key3 = value3
-
-[section4]
 key1 = value1
 key2 = value2
 key3 = value3

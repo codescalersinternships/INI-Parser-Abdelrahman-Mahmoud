@@ -2,6 +2,7 @@ package iniparser
 
 import (
 	"reflect"
+	"sort"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -32,6 +33,12 @@ type SaveToFileTestCase struct {
 	inputMap  map[string]map[string]string
 }
 
+type GetSectionNamesTestCase struct {
+	desc        string
+	inputMap    map[string]map[string]string
+	outputSlice []string
+}
+
 type GetSectionsTestCase struct {
 	desc           string
 	inputOutputMap map[string]map[string]string
@@ -44,6 +51,23 @@ type GetTestCase struct {
 	key           string
 	value         string
 	expectedError error
+}
+
+func sliceEqual(a, b []string) bool {
+	if len(a) != len(b) {
+		return false
+	}
+
+	a_copy := make([]string, len(a))
+	b_copy := make([]string, len(b))
+
+	copy(a_copy, a)
+	copy(b_copy, b)
+
+	sort.Strings(a_copy)
+	sort.Strings(b_copy)
+
+	return reflect.DeepEqual(a_copy, b_copy)
 }
 
 func TestINI_LoadFromString(t *testing.T) {
@@ -991,6 +1015,134 @@ func TestINI_Get(t *testing.T) {
 
 			assert.Equal(t, test.expectedError, resultedError)
 			if resultedValue != test.value {
+				t.Fail()
+			}
+
+		})
+	}
+}
+
+func TestINI_GetSectionNames(t *testing.T) {
+	parser := IniFile{}
+	testCases := []GetSectionNamesTestCase{
+		{
+			desc:        "Empty map as input",
+			inputMap:    make(map[string]map[string]string),
+			outputSlice: []string{},
+		},
+		{
+			desc: "Only sections inside file",
+			inputMap: map[string]map[string]string{"section1": make(map[string]string),
+				"section2": make(map[string]string),
+				"section3": make(map[string]string),
+				"section4": make(map[string]string)},
+			outputSlice: []string{"section1", "section2", "section3", "section4"},
+		},
+		{
+			desc: "Normal case 1",
+			inputMap: map[string]map[string]string{"section1": {
+				"key1": "value1",
+				"key2": "value2",
+			},
+			},
+			outputSlice: []string{"section1"},
+		},
+		{
+			desc: "Normal case 2",
+			inputMap: map[string]map[string]string{"section1": {
+				"key1": "value1",
+				"key2": "value2",
+				"key3": "value3",
+				"key4": "value4",
+			},
+				"section2": {
+					"key1": "value1",
+					"key2": "value2",
+				},
+			},
+			outputSlice: []string{"section1", "section2"},
+		},
+		{
+			desc: "Normal case 3",
+			inputMap: map[string]map[string]string{"section1": {
+				"key1": "value1",
+				"key2": "value2",
+				"key3": "value3",
+				"key4": "value4",
+			},
+				"section2": {
+					"key1": "value1",
+					"key2": "value2",
+					"key3": "value3",
+				},
+				"section3": {
+					"key1": "value1",
+					"key2": "value2",
+					"key3": "value3",
+					"key4": "value4",
+				},
+			},
+			outputSlice: []string{"section1", "section2", "section3"},
+		},
+		{
+			desc: "Normal case 4",
+			inputMap: map[string]map[string]string{"section1": {
+				"key1": "value1",
+				"key2": "value2",
+				"key3": "value3",
+				"key4": "value4",
+				"key5": "value5",
+				"key6": "value6",
+				"key7": "value7",
+			},
+				"section2": {
+					"key1": "value1",
+					"key2": "value2",
+					"key3": "value3",
+				},
+				"section3": {
+					"key1": "value1",
+					"key2": "value2",
+					"key3": "value3",
+					"key4": "value4",
+				},
+			},
+			outputSlice: []string{"section1", "section2", "section3"},
+		},
+		{
+			desc: "Normal case 5",
+			inputMap: map[string]map[string]string{"section1": {
+				"key1": "value1",
+				"key2": "value2",
+			},
+				"section2": {
+					"key1": "value1",
+					"key2": "value2",
+					"key3": "value3",
+					"key4": "value4",
+					"key5": "value5",
+				},
+				"section3": {
+					"key1": "value1",
+					"key2": "value2",
+					"key3": "value3",
+				},
+				"section4": {
+					"key1": "value1",
+					"key2": "value2",
+					"key3": "value3",
+				},
+			},
+			outputSlice: []string{"section1", "section2", "section3", "section4"},
+		},
+	}
+	for _, test := range testCases {
+		t.Run(test.desc, func(t *testing.T) {
+			resultedOutput := parser.String(test.inputMap)
+			_, _ = parser.LoadFromString(resultedOutput)
+			resultedSlice := parser.GetSectionNames()
+
+			if !sliceEqual(test.outputSlice, resultedSlice) {
 				t.Fail()
 			}
 
