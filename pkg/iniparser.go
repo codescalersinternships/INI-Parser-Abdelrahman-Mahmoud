@@ -8,10 +8,11 @@ import (
 )
 
 var (
-	errReadingFile  = errors.New("trying to read file")
-	errWritingFile  = errors.New("trying to write file")
-	errFileIsEmpty  = errors.New("ini file is empty or does not have section key value pair")
-	errMissingValue = errors.New("section and key pair does not exist")
+	errReadingFile   = errors.New("trying to read file")
+	errWritingFile   = errors.New("trying to write file")
+	errFileIsEmpty   = errors.New("ini file is empty or does not have section key value pair")
+	errMissingValue  = errors.New("section and key pair does not exist")
+	errAlreadyExists = errors.New("section key value pair already exists")
 )
 
 type IniFile struct {
@@ -104,28 +105,29 @@ func (ini *IniFile) Get(section string, key string) (string, error) {
 	return value, nil
 }
 
-func (ini *IniFile) Set(section string, key string, value string) {
+func (ini *IniFile) Set(section string, key string, value string) error {
 	sectionNames := ini.GetSectionNames()
 	for _, sectionName := range sectionNames {
 		if sectionName == section {
-			ini.sectionKeyValuePairs[section][key] = value
-			return
+			oldValue := ini.sectionKeyValuePairs[section][key]
+			if oldValue == "" {
+				ini.sectionKeyValuePairs[section][key] = value
+				return nil
+			} else {
+				return errAlreadyExists
+			}
 		}
 	}
 	ini.sectionKeyValuePairs[section] = make(map[string]string)
 	ini.sectionKeyValuePairs[section][key] = value
-
+	return nil
 }
 
 func (ini *IniFile) SaveToFile(filePath string, sectionKeyValueMap map[string]map[string]string) error {
 
 	fileContent := []byte(ini.String(sectionKeyValueMap))
 
-	err := os.WriteFile(filePath, fileContent, 0644)
-
-	if err != nil {
-		return errWritingFile
-	}
+	_ = os.WriteFile(filePath, fileContent, 0644)
 
 	return nil
 }

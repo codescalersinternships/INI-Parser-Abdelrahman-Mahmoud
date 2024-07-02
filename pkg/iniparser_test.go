@@ -28,9 +28,10 @@ type StringTestCase struct {
 }
 
 type SaveToFileTestCase struct {
-	desc      string
-	inputPath string
-	inputMap  map[string]map[string]string
+	desc          string
+	inputPath     string
+	inputMap      map[string]map[string]string
+	expectedError error
 }
 
 type GetSectionNamesTestCase struct {
@@ -44,7 +45,7 @@ type GetSectionsTestCase struct {
 	inputOutputMap map[string]map[string]string
 }
 
-type GetTestCase struct {
+type GetSetTestCase struct {
 	desc          string
 	inputMap      map[string]map[string]string
 	section       string
@@ -627,9 +628,10 @@ func TestINI_SaveToFile(t *testing.T) {
 	parser := IniFile{}
 	testCases := []SaveToFileTestCase{
 		{
-			desc:      "Empty map as input",
-			inputPath: "testdata/test_01.txt",
-			inputMap:  make(map[string]map[string]string),
+			desc:          "Empty map as input",
+			inputPath:     "testdata/test_01.txt",
+			inputMap:      make(map[string]map[string]string),
+			expectedError: nil,
 		},
 		{
 			desc:      "Only sections inside file",
@@ -638,6 +640,7 @@ func TestINI_SaveToFile(t *testing.T) {
 				"section2": make(map[string]string),
 				"section3": make(map[string]string),
 				"section4": make(map[string]string)},
+			expectedError: nil,
 		},
 		{
 			desc:      "Normal case 1",
@@ -647,6 +650,7 @@ func TestINI_SaveToFile(t *testing.T) {
 				"key2": "value2",
 			},
 			},
+			expectedError: nil,
 		},
 		{
 			desc:      "Normal case 2",
@@ -662,6 +666,7 @@ func TestINI_SaveToFile(t *testing.T) {
 					"key2": "value2",
 				},
 			},
+			expectedError: nil,
 		},
 		{
 			desc:      "Normal case 3",
@@ -735,6 +740,7 @@ func TestINI_SaveToFile(t *testing.T) {
 					"key3": "value3",
 				},
 			},
+			expectedError: nil,
 		},
 	}
 	for _, test := range testCases {
@@ -742,7 +748,7 @@ func TestINI_SaveToFile(t *testing.T) {
 			resultedError := parser.SaveToFile(test.inputPath, test.inputMap)
 			resultedMap, _ := parser.LoadFromFile(test.inputPath)
 
-			assert.Equal(t, nil, resultedError)
+			assert.Equal(t, test.expectedError, resultedError)
 			if !reflect.DeepEqual(test.inputMap, resultedMap) {
 				t.Fail()
 			}
@@ -874,7 +880,7 @@ func TestINI_GetSections(t *testing.T) {
 
 func TestINI_Get(t *testing.T) {
 	parser := IniFile{}
-	testCases := []GetTestCase{
+	testCases := []GetSetTestCase{
 		{
 			desc:          "Empty map as input",
 			inputMap:      make(map[string]map[string]string),
@@ -1014,6 +1020,157 @@ func TestINI_Get(t *testing.T) {
 			resultedValue, resultedError := parser.Get(test.section, test.key)
 
 			assert.Equal(t, test.expectedError, resultedError)
+			if resultedValue != test.value {
+				t.Fail()
+			}
+
+		})
+	}
+}
+
+func TestINI_Set(t *testing.T) {
+	parser := IniFile{}
+	testCases := []GetSetTestCase{
+		{
+			desc:          "Empty map as input",
+			inputMap:      make(map[string]map[string]string),
+			section:       "section1",
+			key:           "key1",
+			value:         "value1",
+			expectedError: nil,
+		},
+		{
+			desc: "Only sections inside file",
+			inputMap: map[string]map[string]string{"section1": make(map[string]string),
+				"section2": make(map[string]string),
+				"section3": make(map[string]string),
+				"section4": make(map[string]string)},
+			section:       "section1",
+			key:           "key1",
+			value:         "value1",
+			expectedError: nil,
+		},
+		{
+			desc: "Normal case 1",
+			inputMap: map[string]map[string]string{"section1": {
+				"key1": "value1",
+				"key2": "value2",
+			},
+			},
+			section:       "section1",
+			key:           "key1",
+			value:         "value1",
+			expectedError: errAlreadyExists,
+		},
+		{
+			desc: "Normal case 2",
+			inputMap: map[string]map[string]string{"section1": {
+				"key1": "value1",
+				"key2": "value2",
+				"key3": "value3",
+				"key4": "value4",
+			},
+				"section2": {
+					"key1": "value1",
+					"key2": "value2",
+				},
+			},
+			section:       "section2",
+			key:           "key1",
+			value:         "value1",
+			expectedError: errAlreadyExists,
+		},
+		{
+			desc: "Normal case 3",
+			inputMap: map[string]map[string]string{"section1": {
+				"key1": "value1",
+				"key2": "value2",
+				"key3": "value3",
+				"key4": "value4",
+			},
+				"section2": {
+					"key1": "value1",
+					"key2": "value2",
+					"key3": "value3",
+				},
+				"section3": {
+					"key1": "value1",
+					"key2": "value2",
+					"key3": "value3",
+					"key4": "value4",
+				},
+			},
+			section:       "section3",
+			key:           "key5",
+			value:         "key5",
+			expectedError: nil,
+		},
+		{
+			desc: "Normal case 4",
+			inputMap: map[string]map[string]string{"section1": {
+				"key1": "value1",
+				"key2": "value2",
+				"key3": "value3",
+				"key4": "value4",
+				"key5": "value5",
+				"key6": "value6",
+				"key7": "value7",
+			},
+				"section2": {
+					"key1": "value1",
+					"key2": "value2",
+					"key3": "value3",
+				},
+				"section3": {
+					"key1": "value1",
+					"key2": "value2",
+					"key3": "value3",
+					"key4": "value4",
+				},
+			},
+			section:       "section4",
+			key:           "key1",
+			value:         "value1",
+			expectedError: nil,
+		},
+		{
+			desc: "Normal case 5",
+			inputMap: map[string]map[string]string{"section1": {
+				"key1": "value1",
+				"key2": "value2",
+			},
+				"section2": {
+					"key1": "value1",
+					"key2": "value2",
+					"key3": "value3",
+					"key4": "value4",
+					"key5": "value5",
+				},
+				"section3": {
+					"key1": "value1",
+					"key2": "value2",
+					"key3": "value3",
+				},
+				"section4": {
+					"key1": "value1",
+					"key2": "value2",
+					"key3": "value3",
+				},
+			},
+			section:       "section3",
+			key:           "key4",
+			value:         "key4",
+			expectedError: nil,
+		},
+	}
+	for _, test := range testCases {
+		t.Run(test.desc, func(t *testing.T) {
+			resultedOutput := parser.String(test.inputMap)
+			_, _ = parser.LoadFromString(resultedOutput)
+			setError := parser.Set(test.section, test.key, test.value)
+			resultedValue, _ := parser.Get(test.section, test.key)
+
+			assert.Equal(t, test.expectedError, setError)
 			if resultedValue != test.value {
 				t.Fail()
 			}
