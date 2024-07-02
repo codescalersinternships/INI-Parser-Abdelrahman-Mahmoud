@@ -712,3 +712,124 @@ func TestINI_SaveToFile(t *testing.T) {
 		})
 	}
 }
+
+func TestINI_GetSections(t *testing.T) {
+	parser := IniFile{}
+	testCases := []StringTestCase{
+		{
+			desc:     "Empty map as input",
+			inputMap: make(map[string]map[string]string),
+		},
+		{
+			desc: "Only sections inside file",
+			inputMap: map[string]map[string]string{"section1": make(map[string]string),
+				"section2": make(map[string]string),
+				"section3": make(map[string]string),
+				"section4": make(map[string]string)},
+		},
+		{
+			desc: "Normal case 1",
+			inputMap: map[string]map[string]string{"section1": {
+				"key1": "value1",
+				"key2": "value2",
+			},
+			},
+		},
+		{
+			desc: "Normal case 2",
+			inputMap: map[string]map[string]string{"section1": {
+				"key1": "value1",
+				"key2": "value2",
+				"key3": "value3",
+				"key4": "value4",
+			},
+				"section2": {
+					"key1": "value1",
+					"key2": "value2",
+				},
+			},
+		},
+		{
+			desc: "Normal case 3",
+			inputMap: map[string]map[string]string{"section1": {
+				"key1": "value1",
+				"key2": "value2",
+				"key3": "value3",
+				"key4": "value4",
+			},
+				"section2": {
+					"key1": "value1",
+					"key2": "value2",
+					"key3": "value3",
+				},
+				"section3": {
+					"key1": "value1",
+					"key2": "value2",
+					"key3": "value3",
+					"key4": "value4",
+				},
+			},
+		},
+		{
+			desc: "Normal case 4",
+			inputMap: map[string]map[string]string{"section1": {
+				"key1": "value1",
+				"key2": "value2",
+				"key3": "value3",
+				"key4": "value4",
+				"key5": "value5",
+				"key6": "value6",
+				"key7": "value7",
+			},
+				"section2": {
+					"key1": "value1",
+					"key2": "value2",
+					"key3": "value3",
+				},
+				"section3": {
+					"key1": "value1",
+					"key2": "value2",
+					"key3": "value3",
+					"key4": "value4",
+				},
+			},
+		},
+		{
+			desc: "Normal case 5",
+			inputMap: map[string]map[string]string{"section1": {
+				"key1": "value1",
+				"key2": "value2",
+			},
+				"section2": {
+					"key1": "value1",
+					"key2": "value2",
+					"key3": "value3",
+					"key4": "value4",
+					"key5": "value5",
+				},
+				"section3": {
+					"key1": "value1",
+					"key2": "value2",
+					"key3": "value3",
+				},
+				"section4": {
+					"key1": "value1",
+					"key2": "value2",
+					"key3": "value3",
+				},
+			},
+		},
+	}
+	for _, test := range testCases {
+		t.Run(test.desc, func(t *testing.T) {
+			resultedOutput := parser.String(test.inputMap)
+			resultedMap, _ := parser.LoadFromString(resultedOutput)
+			resultedMap = parser.GetSections()
+
+			if !reflect.DeepEqual(test.inputMap, resultedMap) {
+				t.Fail()
+			}
+
+		})
+	}
+}
