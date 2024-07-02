@@ -37,6 +37,14 @@ type GetSectionsTestCase struct {
 	inputOutputMap map[string]map[string]string
 }
 
+type GetTestCase struct {
+	desc     string
+	inputMap map[string]map[string]string
+	section  string
+	key      string
+	value    string
+}
+
 func TestINI_LoadFromString(t *testing.T) {
 	parser := IniFile{}
 	emptyMap := make(map[string]map[string]string)
