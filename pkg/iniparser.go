@@ -8,9 +8,10 @@ import (
 )
 
 var (
-	errReadingFile = errors.New("trying to read file")
-	errWritingFile = errors.New("trying to write file")
-	errFileIsEmpty = errors.New("ini file is empty or does not have section key value pair")
+	errReadingFile  = errors.New("trying to read file")
+	errWritingFile  = errors.New("trying to write file")
+	errFileIsEmpty  = errors.New("ini file is empty or does not have section key value pair")
+	errMissingValue = errors.New("section and key pair does not exist")
 )
 
 type IniFile struct {
@@ -95,8 +96,12 @@ func (ini *IniFile) GetSections() map[string]map[string]string {
 	return ini.sectionKeyValuePairs
 }
 
-func (ini *IniFile) Get(section string, key string) string {
-	return ini.sectionKeyValuePairs[section][key]
+func (ini *IniFile) Get(section string, key string) (string, error) {
+	value := ini.sectionKeyValuePairs[section][key]
+	if value == "" {
+		return value, errMissingValue
+	}
+	return value, nil
 }
 
 func (ini *IniFile) Set(section string, key string, value string) {
