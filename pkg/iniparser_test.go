@@ -32,6 +32,11 @@ type SaveToFileTestCase struct {
 	inputMap  map[string]map[string]string
 }
 
+type GetSectionsTestCase struct {
+	desc           string
+	inputOutputMap map[string]map[string]string
+}
+
 func TestINI_LoadFromString(t *testing.T) {
 	parser := IniFile{}
 	emptyMap := make(map[string]map[string]string)
@@ -715,21 +720,21 @@ func TestINI_SaveToFile(t *testing.T) {
 
 func TestINI_GetSections(t *testing.T) {
 	parser := IniFile{}
-	testCases := []StringTestCase{
+	testCases := []GetSectionsTestCase{
 		{
-			desc:     "Empty map as input",
-			inputMap: make(map[string]map[string]string),
+			desc:           "Empty map as input",
+			inputOutputMap: make(map[string]map[string]string),
 		},
 		{
 			desc: "Only sections inside file",
-			inputMap: map[string]map[string]string{"section1": make(map[string]string),
+			inputOutputMap: map[string]map[string]string{"section1": make(map[string]string),
 				"section2": make(map[string]string),
 				"section3": make(map[string]string),
 				"section4": make(map[string]string)},
 		},
 		{
 			desc: "Normal case 1",
-			inputMap: map[string]map[string]string{"section1": {
+			inputOutputMap: map[string]map[string]string{"section1": {
 				"key1": "value1",
 				"key2": "value2",
 			},
@@ -737,7 +742,7 @@ func TestINI_GetSections(t *testing.T) {
 		},
 		{
 			desc: "Normal case 2",
-			inputMap: map[string]map[string]string{"section1": {
+			inputOutputMap: map[string]map[string]string{"section1": {
 				"key1": "value1",
 				"key2": "value2",
 				"key3": "value3",
@@ -751,7 +756,7 @@ func TestINI_GetSections(t *testing.T) {
 		},
 		{
 			desc: "Normal case 3",
-			inputMap: map[string]map[string]string{"section1": {
+			inputOutputMap: map[string]map[string]string{"section1": {
 				"key1": "value1",
 				"key2": "value2",
 				"key3": "value3",
@@ -772,7 +777,7 @@ func TestINI_GetSections(t *testing.T) {
 		},
 		{
 			desc: "Normal case 4",
-			inputMap: map[string]map[string]string{"section1": {
+			inputOutputMap: map[string]map[string]string{"section1": {
 				"key1": "value1",
 				"key2": "value2",
 				"key3": "value3",
@@ -796,7 +801,7 @@ func TestINI_GetSections(t *testing.T) {
 		},
 		{
 			desc: "Normal case 5",
-			inputMap: map[string]map[string]string{"section1": {
+			inputOutputMap: map[string]map[string]string{"section1": {
 				"key1": "value1",
 				"key2": "value2",
 			},
@@ -822,11 +827,11 @@ func TestINI_GetSections(t *testing.T) {
 	}
 	for _, test := range testCases {
 		t.Run(test.desc, func(t *testing.T) {
-			resultedOutput := parser.String(test.inputMap)
-			resultedMap, _ := parser.LoadFromString(resultedOutput)
-			resultedMap = parser.GetSections()
+			resultedOutput := parser.String(test.inputOutputMap)
+			_, _ = parser.LoadFromString(resultedOutput)
+			resultedMap := parser.GetSections()
 
-			if !reflect.DeepEqual(test.inputMap, resultedMap) {
+			if !reflect.DeepEqual(test.inputOutputMap, resultedMap) {
 				t.Fail()
 			}
 
