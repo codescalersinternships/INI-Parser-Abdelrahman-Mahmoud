@@ -1,3 +1,4 @@
+// Package iniparser provide methods to use on ini files. 
 package iniparser
 
 import (
@@ -18,6 +19,7 @@ type IniFile struct {
 	sectionKeyValuePairs map[string]map[string]string
 }
 
+// LoadFromString loads the content of ini file from multi-lined string. 
 func (ini *IniFile) LoadFromString(iniText string) (map[string]map[string]string, error) {
 
 	var section string
@@ -58,6 +60,7 @@ func (ini *IniFile) LoadFromString(iniText string) (map[string]map[string]string
 	return ini.sectionKeyValuePairs, nil
 }
 
+// String converts the ini file contents into a mult-lined string
 func (ini *IniFile) String(sectionKeyValueMap map[string]map[string]string) string {
 
 	iniText := ""
@@ -72,6 +75,7 @@ func (ini *IniFile) String(sectionKeyValueMap map[string]map[string]string) stri
 	return iniText
 }
 
+//LoadFromFile loads the content of a given ini file  
 func (ini *IniFile) LoadFromFile(fileName string) (map[string]map[string]string, error) {
 
 	fileContent, err := os.ReadFile(fileName)
@@ -84,6 +88,7 @@ func (ini *IniFile) LoadFromFile(fileName string) (map[string]map[string]string,
 	return ini.LoadFromString(string(fileContent))
 }
 
+// GetSectionNames retrives the sections of the ini file
 func (ini *IniFile) GetSectionNames() []string {
 	var sectionNames []string
 	for section := range ini.sectionKeyValuePairs {
@@ -92,10 +97,12 @@ func (ini *IniFile) GetSectionNames() []string {
 	return sectionNames
 }
 
+// GetSections retrives the section key value pairs of the ini file
 func (ini *IniFile) GetSections() map[string]map[string]string {
 	return ini.sectionKeyValuePairs
 }
 
+// Get retrives a value for a specific key inside a section
 func (ini *IniFile) Get(section string, key string) (string, error) {
 	value := ini.sectionKeyValuePairs[section][key]
 	if value == "" {
@@ -104,6 +111,7 @@ func (ini *IniFile) Get(section string, key string) (string, error) {
 	return value, nil
 }
 
+// Set adds a key value pair inside a section
 func (ini *IniFile) Set(section string, key string, value string) error {
 	sectionNames := ini.GetSectionNames()
 	for _, sectionName := range sectionNames {
@@ -122,6 +130,7 @@ func (ini *IniFile) Set(section string, key string, value string) error {
 	return nil
 }
 
+// SaveToFile save the section key value pairs to a given file
 func (ini *IniFile) SaveToFile(filePath string, sectionKeyValueMap map[string]map[string]string) error {
 
 	fileContent := []byte(ini.String(sectionKeyValueMap))
