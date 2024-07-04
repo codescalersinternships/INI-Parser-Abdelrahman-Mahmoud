@@ -1,4 +1,4 @@
-// Package iniparser provide methods to use on ini files. 
+// Package iniparser provide methods to use on ini files.
 package iniparser
 
 import (
@@ -19,7 +19,7 @@ type IniFile struct {
 	sectionKeyValuePairs map[string]map[string]string
 }
 
-// LoadFromString loads the content of ini file from multi-lined string. 
+// LoadFromString loads the content of ini file from multi-lined string.
 func (ini *IniFile) LoadFromString(iniText string) (map[string]map[string]string, error) {
 
 	var section string
@@ -75,7 +75,7 @@ func (ini *IniFile) String(sectionKeyValueMap map[string]map[string]string) stri
 	return iniText
 }
 
-//LoadFromFile loads the content of a given ini file  
+// LoadFromFile loads the content of a given ini file
 func (ini *IniFile) LoadFromFile(fileName string) (map[string]map[string]string, error) {
 
 	fileContent, err := os.ReadFile(fileName)
