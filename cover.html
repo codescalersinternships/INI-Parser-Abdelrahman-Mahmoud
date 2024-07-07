@@ -1,0 +1,293 @@
+
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<title>INI-Parser-Abdelrahman-Mahmoud: Go Coverage Report</title>
+		<style>
+			body {
+				background: black;
+				color: rgb(80, 80, 80);
+			}
+			body, pre, #legend span {
+				font-family: Menlo, monospace;
+				font-weight: bold;
+			}
+			#topbar {
+				background: black;
+				position: fixed;
+				top: 0; left: 0; right: 0;
+				height: 42px;
+				border-bottom: 1px solid rgb(80, 80, 80);
+			}
+			#content {
+				margin-top: 50px;
+			}
+			#nav, #legend {
+				float: left;
+				margin-left: 10px;
+			}
+			#legend {
+				margin-top: 12px;
+			}
+			#nav {
+				margin-top: 10px;
+			}
+			#legend span {
+				margin: 0 5px;
+			}
+			.cov0 { color: rgb(192, 0, 0) }
+.cov1 { color: rgb(128, 128, 128) }
+.cov2 { color: rgb(116, 140, 131) }
+.cov3 { color: rgb(104, 152, 134) }
+.cov4 { color: rgb(92, 164, 137) }
+.cov5 { color: rgb(80, 176, 140) }
+.cov6 { color: rgb(68, 188, 143) }
+.cov7 { color: rgb(56, 200, 146) }
+.cov8 { color: rgb(44, 212, 149) }
+.cov9 { color: rgb(32, 224, 152) }
+.cov10 { color: rgb(20, 236, 155) }
+
+		</style>
+	</head>
+	<body>
+		<div id="topbar">
+			<div id="nav">
+				<select id="files">
+				
+				<option value="file0">github.com/codescalersinternships/INI-Parser-Abdelrahman-Mahmoud/main.go (0.0%)</option>
+				
+				<option value="file1">github.com/codescalersinternships/INI-Parser-Abdelrahman-Mahmoud/pkg/iniparser.go (98.4%)</option>
+				
+				</select>
+			</div>
+			<div id="legend">
+				<span>not tracked</span>
+			
+				<span class="cov0">not covered</span>
+				<span class="cov8">covered</span>
+			
+			</div>
+		</div>
+		<div id="content">
+		
+		<pre class="file" id="file0" style="display: none">package main
+
+import (
+        "fmt"
+
+        iniparser "github.com/codescalersinternships/INI-Parser-Abdelrahman-Mahmoud/pkg"
+)
+
+func main() <span class="cov0" title="0">{
+
+        parser := iniparser.IniFile{}
+
+        outputMap, err := parser.LoadFromFile("test.ini")
+
+        fmt.Println(err)
+
+        // inputMap := map[string]map[string]string{"section1": {
+        //         "key1": "value1",
+        //         "key2": "value2",
+        // },
+        //         "section2": {
+        //                 "key1": "value1",
+        //                 "key2": "value2",
+        //                 "key3": "value3",
+        //                 "key4": "value4",
+        //                 "key5": "value5",
+        //         },
+        //         "section3": {
+        //                 "key1": "value1",
+        //                 "key2": "value2",
+        //                 "key3": "value3",
+        //         },
+        //         "section4": {
+        //                 "key1": "value1",
+        //                 "key2": "value2",
+        //                 "key3": "value3",
+        //         },
+        // }
+
+        resultedOutput := parser.String(outputMap)
+        fmt.Print(resultedOutput)
+        resultedMap, _ := parser.LoadFromString(resultedOutput)
+
+        fmt.Print(resultedMap)
+        fmt.Print(outputMap)
+
+        _ = parser.SaveToFile("test2.ini", outputMap)
+
+}</span>
+</pre>
+		
+		<pre class="file" id="file1" style="display: none">package iniparser
+
+import (
+        "errors"
+        "os"
+        "reflect"
+        "strings"
+)
+
+var (
+        errReadingFile   = errors.New("trying to read file")
+        errWritingFile   = errors.New("trying to write file")
+        errFileIsEmpty   = errors.New("ini file is empty or does not have section key value pair")
+        errMissingValue  = errors.New("section and key pair does not exist")
+        errAlreadyExists = errors.New("section key value pair already exists")
+)
+
+type IniFile struct {
+        sectionKeyValuePairs map[string]map[string]string
+}
+
+func (ini *IniFile) LoadFromString(iniText string) (map[string]map[string]string, error) <span class="cov8" title="1">{
+
+        var section string
+        var key string
+        var value string
+        emptyMap := make(map[string]map[string]string)
+
+        sectionAvailable := false
+        ini.sectionKeyValuePairs = emptyMap
+
+        if iniText == "" </span><span class="cov8" title="1">{
+                return emptyMap, errFileIsEmpty
+        }</span>
+
+        <span class="cov8" title="1">lines := strings.Split(iniText, "\n")
+
+        for _, line := range lines </span><span class="cov8" title="1">{
+
+                if len(line) == 0 </span><span class="cov8" title="1">{
+                        continue</span>
+                } else<span class="cov8" title="1"> if string(line[0]) == ";" || string(line[0]) == "#" </span><span class="cov8" title="1">{
+                        continue</span>
+                } else<span class="cov8" title="1"> if string(line[0]) == "[" </span><span class="cov8" title="1">{
+                        section = strings.TrimSpace(line[1 : len(line)-1])
+                        ini.sectionKeyValuePairs[section] = make(map[string]string)
+                        sectionAvailable = true
+                }</span> else<span class="cov8" title="1"> if sectionAvailable </span><span class="cov8" title="1">{
+
+                        s := strings.Split(line, "=")
+                        key, value = strings.TrimSpace(s[0]), strings.TrimSpace(s[1])
+                        ini.sectionKeyValuePairs[section][key] = value
+                }</span>
+        }
+
+        <span class="cov8" title="1">if reflect.DeepEqual(ini.sectionKeyValuePairs, make(map[string]map[string]string)) </span><span class="cov8" title="1">{
+                return emptyMap, errFileIsEmpty
+        }</span>
+        <span class="cov8" title="1">return ini.sectionKeyValuePairs, nil</span>
+}
+
+func (ini *IniFile) String(sectionKeyValueMap map[string]map[string]string) string <span class="cov8" title="1">{
+
+        iniText := ""
+
+        for sectionName := range sectionKeyValueMap </span><span class="cov8" title="1">{
+                iniText = iniText + "\n[" + sectionName + "]\n"
+                for key, value := range sectionKeyValueMap[sectionName] </span><span class="cov8" title="1">{
+                        iniText = iniText + key + " = " + value + "\n"
+                }</span>
+        }
+
+        <span class="cov8" title="1">return iniText</span>
+}
+
+func (ini *IniFile) LoadFromFile(fileName string) (map[string]map[string]string, error) <span class="cov8" title="1">{
+
+        fileContent, err := os.ReadFile(fileName)
+
+        if err != nil </span><span class="cov8" title="1">{
+                emptyMap := make(map[string]map[string]string)
+                return emptyMap, errReadingFile
+        }</span>
+
+        <span class="cov8" title="1">return ini.LoadFromString(string(fileContent))</span>
+}
+
+func (ini *IniFile) GetSectionNames() []string <span class="cov8" title="1">{
+        var sectionNames []string
+        for section := range ini.sectionKeyValuePairs </span><span class="cov8" title="1">{
+                sectionNames = append(sectionNames, section)
+        }</span>
+        <span class="cov8" title="1">return sectionNames</span>
+}
+
+func (ini *IniFile) GetSections() map[string]map[string]string <span class="cov8" title="1">{
+        return ini.sectionKeyValuePairs
+}</span>
+
+func (ini *IniFile) Get(section string, key string) (string, error) <span class="cov8" title="1">{
+        value := ini.sectionKeyValuePairs[section][key]
+        if value == "" </span><span class="cov8" title="1">{
+                return value, errMissingValue
+        }</span>
+        <span class="cov8" title="1">return value, nil</span>
+}
+
+func (ini *IniFile) Set(section string, key string, value string) error <span class="cov8" title="1">{
+        sectionNames := ini.GetSectionNames()
+        for _, sectionName := range sectionNames </span><span class="cov8" title="1">{
+                if sectionName == section </span><span class="cov8" title="1">{
+                        oldValue := ini.sectionKeyValuePairs[section][key]
+                        if oldValue == "" </span><span class="cov8" title="1">{
+                                ini.sectionKeyValuePairs[section][key] = value
+                                return nil
+                        }</span> else<span class="cov8" title="1"> {
+                                return errAlreadyExists
+                        }</span>
+                }
+        }
+        <span class="cov8" title="1">ini.sectionKeyValuePairs[section] = make(map[string]string)
+        ini.sectionKeyValuePairs[section][key] = value
+        return nil</span>
+}
+
+func (ini *IniFile) SaveToFile(filePath string, sectionKeyValueMap map[string]map[string]string) error <span class="cov8" title="1">{
+
+        fileContent := []byte(ini.String(sectionKeyValueMap))
+
+        err := os.WriteFile(filePath, fileContent, 0644)
+
+        if err != nil </span><span class="cov0" title="0">{
+                return errWritingFile
+        }</span>
+
+        <span class="cov8" title="1">return nil</span>
+}
+</pre>
+		
+		</div>
+	</body>
+	<script>
+	(function() {
+		var files = document.getElementById('files');
+		var visible;
+		files.addEventListener('change', onChange, false);
+		function select(part) {
+			if (visible)
+				visible.style.display = 'none';
+			visible = document.getElementById(part);
+			if (!visible)
+				return;
+			files.value = part;
+			visible.style.display = 'block';
+			location.hash = part;
+		}
+		function onChange() {
+			select(files.value);
+			window.scrollTo(0, 0);
+		}
+		if (location.hash != "") {
+			select(location.hash.substr(1));
+		}
+		if (!visible) {
+			select("file0");
+		}
+	})();
+	</script>
+</html>
